@@ -84,6 +84,35 @@ def generate_base_business():
     }
 
 def apply_name_noise(name):
+    # Kannada Phonetic Drift Dictionary
+    phonetic_swaps = {
+        "Bengaluru": "Banglore",
+        "Venkateshwara": "Venkatashwara",
+        "Kaveri": "Cauvery",
+        "Mysore": "Mysuru",
+        "Srinivasa": "Srinivas",
+        "Karnataka": "Karnatka",
+        "Industries": "Indstries",
+        "Enterprises": "Enterprizes",
+        "Global": "Globle",
+        "Sunrise": "Sunrice",
+        "Indian": "Indean",
+        "Bharath": "Bharat",
+        "Ganesh": "Ganesha",
+        "Namma": "Namm",
+        "Apex": "Apeks",
+        "Pioneer": "Pioneir",
+        "Manufacturing": "Manufactring",
+        "Technologies": "Technologys",
+        "Chemicals": "Chemikals",
+        "Plastics": "Plastiks"
+    }
+    
+    # 30% chance to swap core words with phonetic variations
+    for k, v in phonetic_swaps.items():
+        if k in name and random.random() < 0.30:
+            name = name.replace(k, v)
+            
     variations = [
         lambda x: x.replace("Pvt Ltd", "(P) Ltd"),
         lambda x: x.replace("Private Limited", "Pvt. Ltd."),
@@ -135,6 +164,21 @@ async def generate_and_seed():
         ab2["address_raw"] = f"Unit 2, {new_locality}, Bengaluru {new_pincode}"
         
         base_businesses.extend([ab1, ab2])
+
+    print("Injecting static real-world MCA data...")
+    mca_mock_data = [
+        {"business_name": "Zerodha Broking Limited", "address_raw": "153/154, 4th Cross, J.P Nagar 4th Phase, Bengaluru, Karnataka 560078", "address_locality": "JP Nagar", "address_pincode": "560078", "pan": "AABCZ1234E", "gstin": "29AABCZ1234E1Z5", "nic_code": "66120", "registration_date": datetime(2010, 8, 15).date(), "phone": "+91 8047181888", "ubid": f"KA-UBID-{uuid.uuid4().hex[:8].upper()}"},
+        {"business_name": "Ather Energy Private Limited", "address_raw": "No. 1, 3rd Floor, IBC Knowledge Park, Bannerghatta Road, Bengaluru 560029", "address_locality": "Bannerghatta", "address_pincode": "560029", "pan": "AACCA5678F", "gstin": "29AACCA5678F1Z6", "nic_code": "29100", "registration_date": datetime(2013, 3, 1).date(), "phone": "+91 7676600090", "ubid": f"KA-UBID-{uuid.uuid4().hex[:8].upper()}"},
+        {"business_name": "Infosys Limited", "address_raw": "Plot No. 44, Electronics City, Hosur Road, Bengaluru, Karnataka 560100", "address_locality": "Electronic City Phase 1", "address_pincode": "560100", "pan": "AAACI1234G", "gstin": "29AAACI1234G1Z7", "nic_code": "62011", "registration_date": datetime(1981, 7, 2).date(), "phone": "+91 8028520261", "ubid": f"KA-UBID-{uuid.uuid4().hex[:8].upper()}"},
+        {"business_name": "Biocon Biologics Limited", "address_raw": "20th KM, Hosur Road, Electronic City, Bengaluru, Karnataka 560100", "address_locality": "Electronic City Phase 2", "address_pincode": "560100", "pan": "AAACB4321H", "gstin": "29AAACB4321H1Z8", "nic_code": "21001", "registration_date": datetime(1978, 11, 29).date(), "phone": "+91 8028082808", "ubid": f"KA-UBID-{uuid.uuid4().hex[:8].upper()}"},
+        {"business_name": "Swiggy (Bundl Technologies Pvt Ltd)", "address_raw": "No. 55, Sycamore, 1st Main Road, Koramangala 1st Block, Bengaluru 560034", "address_locality": "Koramangala", "address_pincode": "560034", "pan": "AACCB8765I", "gstin": "29AACCB8765I1Z9", "nic_code": "56210", "registration_date": datetime(2014, 8, 1).date(), "phone": "+91 8060006600", "ubid": f"KA-UBID-{uuid.uuid4().hex[:8].upper()}"},
+        {"business_name": "Peenya Precision Machining Works", "address_raw": "Plot 12, Phase 2, Peenya Industrial Area, Bengaluru, Karnataka 560058", "address_locality": "KIADB Indl Area, Phase 2, Peenya", "address_pincode": "560058", "pan": "AABCP5678J", "gstin": "29AABCP5678J1Z0", "nic_code": "28290", "registration_date": datetime(1995, 4, 10).date(), "phone": "+91 9880123456", "ubid": f"KA-UBID-{uuid.uuid4().hex[:8].upper()}"},
+        {"business_name": "Karnataka Silk Industries Corporation", "address_raw": "3rd Floor, Public Utility Building, MG Road, Bengaluru 560001", "address_locality": "MG Road", "address_pincode": "560001", "pan": "AAACK9876K", "gstin": "29AAACK9876K1Z1", "nic_code": "13111", "registration_date": datetime(1980, 10, 1).date(), "phone": "+91 8025586411", "ubid": f"KA-UBID-{uuid.uuid4().hex[:8].upper()}"},
+        {"business_name": "Laggere Auto Components Pvt Ltd", "address_raw": "No 45, Main Road, Laggere, Bengaluru, Karnataka 560058", "address_locality": "Laggere", "address_pincode": "560058", "pan": "AACCL4321L", "gstin": "29AACCL4321L1Z2", "nic_code": "29301", "registration_date": datetime(2005, 5, 20).date(), "phone": "+91 9900987654", "ubid": f"KA-UBID-{uuid.uuid4().hex[:8].upper()}"},
+        {"business_name": "Narayana Hrudayalaya Limited", "address_raw": "258/A, Bommasandra Industrial Area, Anekal Taluk, Bengaluru 560099", "address_locality": "Bommasandra Industrial Area", "address_pincode": "560099", "pan": "AAACN1234M", "gstin": "29AAACN1234M1Z3", "nic_code": "86100", "registration_date": datetime(2000, 7, 19).date(), "phone": "+91 8071222222", "ubid": f"KA-UBID-{uuid.uuid4().hex[:8].upper()}"},
+        {"business_name": "Hegganahalli Textile Weavers", "address_raw": "Shed 12, KSSIDC Estate, Hegganahalli, Bengaluru, Karnataka 560058", "address_locality": "Hegganahalli", "address_pincode": "560058", "pan": "AACCH8765N", "gstin": "29AACCH8765N1Z4", "nic_code": "13121", "registration_date": datetime(2012, 2, 14).date(), "phone": "+91 8023456789", "ubid": f"KA-UBID-{uuid.uuid4().hex[:8].upper()}"}
+    ]
+    base_businesses.extend(mca_mock_data)
 
     # Assign statuses using weighted random choice
     for b in base_businesses:

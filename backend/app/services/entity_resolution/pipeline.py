@@ -20,8 +20,29 @@ from app.services.entity_resolution.blocking import BlockingEngine
 from app.services.entity_resolution.features import FeatureExtractor
 from app.services.entity_resolution.model import EntityResolutionModel
 from app.services.entity_resolution.decision_engine import DecisionEngine
+import networkx as nx
 
 logger = logging.getLogger(__name__)
+
+def resolve_golden_records(scored_pairs: list[dict]) -> list[list[str]]:
+    """
+    Uses graph theory for transitive closures.
+    If Record A matches Record B (score > 0.92), and Record B matches Record C (score > 0.92),
+    then A matches C implicitly.
+    """
+    # Filter only high-confidence pairs
+    filtered_pairs = [p for p in scored_pairs if p.get("score", 0) > 0.92]
+    
+    G = nx.Graph()
+    for pair in filtered_pairs:
+        G.add_edge(pair["record_a_id"], pair["record_b_id"])
+        
+    if len(G.nodes) == 0:
+        return []
+        
+    # Find all connected clusters
+    clusters = list(nx.connected_components(G))
+    return [list(c) for c in clusters]
 
 async def _run_pipeline_async():
     logger.info("Starting Entity Resolution Pipeline...")
