@@ -88,12 +88,12 @@ class EntityResolutionModel:
         # Train base model
         self.xgb_model.fit(X_np, y_np)
         
-        # Calibrate using sigmoid (Platt Scaling) with prefit cv since data might be small
-        logger.info("Applying Platt Scaling calibration...")
+        # Calibrate using sigmoid (Platt Scaling) with cross-validation to prevent data leakage
+        logger.info("Applying Platt Scaling calibration (cv=5)...")
         self.calibrated_model = CalibratedClassifierCV(
             estimator=self.xgb_model,
             method='sigmoid',
-            cv='prefit'
+            cv=5
         )
         self.calibrated_model.fit(X_np, y_np)
         

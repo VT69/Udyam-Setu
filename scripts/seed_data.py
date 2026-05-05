@@ -136,15 +136,13 @@ async def generate_and_seed():
         
         base_businesses.extend([ab1, ab2])
 
-    # Assign statuses: 15 CLOSED, 30 DORMANT, 155 ACTIVE
-    random.shuffle(base_businesses)
-    for i, b in enumerate(base_businesses):
-        if i < 15:
-            b["status"] = RegistryStatus.CLOSED
-        elif i < 45:
-            b["status"] = RegistryStatus.DORMANT
-        else:
-            b["status"] = RegistryStatus.ACTIVE
+    # Assign statuses using weighted random choice
+    for b in base_businesses:
+        b["status"] = random.choices(
+            [RegistryStatus.CLOSED, RegistryStatus.DORMANT, RegistryStatus.ACTIVE],
+            weights=[0.075, 0.15, 0.775],
+            k=1
+        )[0]
 
     ubid_records = []
     dept_records = []
@@ -227,10 +225,16 @@ async def generate_and_seed():
                 for month_offset in range(18):
                     event_date = start_time + timedelta(days=month_offset * 30 + random.randint(1, 5))
                     
-                    # Logic for CLOSED: zero consumption in last 6 months
+                    # Realistic municipal noise
                     consumption = random.randint(500, 15000)
                     if bb["status"] == RegistryStatus.CLOSED and month_offset >= 12:
-                        consumption = 0
+                        if random.random() < 0.25:
+                            consumption = random.randint(100, 500) # Residual consumption
+                        else:
+                            consumption = 0
+                    elif bb["status"] == RegistryStatus.ACTIVE:
+                        if random.random() < 0.10:
+                            consumption = 0 # Solar / Renovations
                         
                     events.append(BusinessEvent(
                         ubid=bb["ubid"],
@@ -244,7 +248,7 @@ async def generate_and_seed():
                     ))
 
             elif dept == Department.FACTORIES:
-                if bb["status"] == RegistryStatus.ACTIVE:
+                if bb["status"] == RegistryStatus.ACTIVE and random.random() >= 0.15:
                     # 1-3 inspections randomly in the 18 months
                     for _ in range(random.randint(1, 3)):
                         event_date = start_time + timedelta(days=random.randint(0, 18 * 30))
@@ -259,7 +263,7 @@ async def generate_and_seed():
                         ))
 
             elif dept == Department.KSPCB and raw_data.get("pollution_category") in ["Red", "Orange"]:
-                if bb["status"] == RegistryStatus.ACTIVE:
+                if bb["status"] == RegistryStatus.ACTIVE and random.random() >= 0.15:
                     # Annual renewal
                     event_date = start_time + timedelta(days=random.randint(100, 200))
                     events.append(BusinessEvent(

@@ -28,11 +28,36 @@ def main():
         sys.exit(1)
         
     print("\n[2/3] Infrastructure Verification")
-    print("Checking if Docker containers are running...")
-    # Simple check if backend is reachable (mocked here for simplicity)
-    print("✓ Backend API detected.")
-    print("✓ PostgreSQL Database detected.")
-    print("✓ Redis & Celery detected.")
+    print("Checking if infrastructure is running...")
+    
+    import requests
+    try:
+        res = requests.get("http://localhost:8000/health", timeout=2)
+        if res.status_code == 200:
+            print("✓ Backend API detected.")
+        else:
+            print(f"❌ Backend API returned status {res.status_code}")
+            sys.exit(1)
+    except Exception as e:
+        print("❌ Backend API is not reachable at http://localhost:8000 (is it running?)")
+        sys.exit(1)
+        
+    try:
+        docker_ps = subprocess.check_output(["docker", "ps"], text=True)
+        if "postgres" in docker_ps.lower() or "timescaledb" in docker_ps.lower():
+            print("✓ PostgreSQL Database detected.")
+        else:
+            print("❌ PostgreSQL container not found in docker ps")
+            sys.exit(1)
+            
+        if "redis" in docker_ps.lower():
+            print("✓ Redis detected.")
+        else:
+            print("❌ Redis container not found in docker ps")
+            sys.exit(1)
+    except Exception as e:
+        print("❌ Failed to run docker ps. Is docker running?")
+        sys.exit(1)
     
     print("\n[3/3] Ready for Presentation")
     print("To start the frontend dashboard, run in a new terminal:")

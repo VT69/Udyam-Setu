@@ -92,45 +92,19 @@ class ActivityClassifier:
             })
             
         top_signals.sort(key=lambda x: abs(x["contribution"]), reverse=True)
-        top_3 = top_signals[:3]
         
-        evidence = self.generate_evidence_summary(predicted_status, features, top_3)
+        # Build full sorted dictionary natively
+        sorted_shap_dict = {x["feature"]: x["contribution"] for x in top_signals}
         
         return {
             "status": predicted_status,
             "probabilities": prob_dict,
             "confidence": confidence,
             "needs_review": needs_review,
-            "shap_values": shap_dict,
-            "evidence_summary": evidence,
-            "top_signals": top_3
+            "shap_values": sorted_shap_dict,
+            "top_signals": top_signals
         }
-        
-    def generate_evidence_summary(self, status: str, features: dict, top_signals: list) -> str:
-        """Generate human-readable natural language summary of the classification."""
-        days_last = features.get("days_since_last_event")
-        active_depts = features.get("distinct_departments_active", 0)
-        bescom_zeros = features.get("bescom_consecutive_zero_months", 0)
-        
-        summary = f"Predicted status is {status}. "
-        
-        if pd.isna(days_last):
-            summary += "No activity events recorded in the 18-month window. "
-        else:
-            months_ago = int(days_last / 30.4)
-            summary += f"Last recorded event was {months_ago} months ago. "
-            
-        if bescom_zeros > 3:
-            summary += f"Severe electrical inactivity: {bescom_zeros} consecutive months of zero BESCOM consumption. "
-            
-        summary += f"Signal diversity: {active_depts} of 4 expected departments active. "
-        
-        # Append top SHAP driver
-        if top_signals:
-            top_driver = top_signals[0]["feature"]
-            summary += f"Primary driver for this prediction was {top_driver}."
-            
-        return summary
+
 
     def bootstrap_labels_from_ground_truth(self, ubid_status_map: Dict[str, str], features_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series]:
         """

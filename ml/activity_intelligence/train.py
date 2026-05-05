@@ -78,8 +78,8 @@ def run_training():
     # Keep feature names for saving
     feature_names = list(X.columns)
     
-    # Train test split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    # Temporal Train/Test split (no shuffling to prevent look-ahead bias)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
     
     print("Training LightGBM Multiclass Model...")
     model = lgb.LGBMClassifier(
